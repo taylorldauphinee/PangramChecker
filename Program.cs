@@ -48,47 +48,73 @@ namespace PangramChecker
             alphabetCount.Add('z', 0);
         }
 
-        static void ResetValues()
+        // checks if each letter's value is more than zero, returns the replay choice
+        static bool CheckValues()
         {
-            foreach(KeyValuePair<char, int> letter in alphabetCount)
-            {
-                alphabetCount[letter.Key] = 0;
-            }
-        }
-
-        static void Main(string[] args)
-        {
-            BaseAlphabet();
-
-            // ask for a sentence to be input
-            Console.WriteLine("Enter your sentence: ");
-            string sentence = Console.ReadLine();
-            sentence = sentence.ToLower();
-
-            // check through all of the characters
-            foreach(char letter in sentence.ToCharArray())
-            {
-                if (alphabetCount.TryGetValue(letter, out int numInstances))
-                {
-                    //Console.WriteLine("Found letter " + Char.ToLower(letter));
-                    alphabetCount[letter] = numInstances + 1;
-                }
-            }
-
-            // check if every character's value is more than zero
-            foreach(KeyValuePair<char, int> letter in alphabetCount)
+            foreach (KeyValuePair<char, int> letter in alphabetCount)
             {
                 Console.WriteLine("There are " + letter.Value + " instances of the letter " + letter.Key);
 
                 if (letter.Value <= 0)
                 {
-                    Console.WriteLine("This sentence is not a pangram.");
-                    Console.WriteLine("Press any key to exit.");
-                    Console.ReadKey(true);
-                    return;
+                    Console.WriteLine("This sentence is not a pangram.\n");
+                    return Replay();
                 }
             }
-            Console.WriteLine("Your sentence is a pangram!");
+            Console.WriteLine("Your sentence is a pangram!\n");
+            return Replay();
+        }
+
+        // asks the player if they want to check another sentence, returns the choice
+        static bool Replay()
+        {
+            Console.WriteLine("Do you want to check another sentence? Y/N");
+            string choice = Console.ReadKey().KeyChar.ToString();
+            Console.WriteLine();
+
+            if (choice.ToLower() == "y") return true;
+            else if (choice.ToLower() == "n") return false;
+            else
+            {
+                Console.WriteLine("Invalid answer. Please try again.\n");
+                return Replay();
+            }
+        }
+
+        // resets the dictionary values for a replay
+        static void ResetValues()
+        {
+            alphabetCount.Clear();
+            BaseAlphabet();
+        }
+
+        static void Main(string[] args)
+        {
+            bool checkWords = true;
+            BaseAlphabet();
+
+            do
+            {
+                // ask for a sentence to be input
+                Console.WriteLine("Enter your sentence: ");
+                string sentence = Console.ReadLine();
+                sentence = sentence.ToLower();
+
+                // check through all of the characters
+                foreach (char letter in sentence.ToCharArray())
+                {
+                    if (alphabetCount.TryGetValue(letter, out int numInstances))
+                    {
+                        alphabetCount[letter] = numInstances + 1;
+                    }
+                }
+
+                checkWords = CheckValues();
+
+                // ensure the values of the dictionary are set to zero
+                ResetValues();
+            }
+            while (checkWords);
 
             Console.WriteLine("Press any key to exit.");
             Console.ReadKey(true);
